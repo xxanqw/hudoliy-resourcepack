@@ -1,0 +1,37 @@
+{
+"music_disc.lilmortyiapizdatyi": {
+    "sounds": [
+        {
+            "name": "records/lilmortyiapizdatyi",
+            "stream": true
+        }
+    ]
+},
+
+"music_disc.valentinstrykalonasheleto": {
+    "sounds": [
+        {
+            "name": "records/valentinstrykalonasheleto",
+            "stream": true
+        }
+    ]
+},
+
+"music_disc.bigbabytapehoodakmpthree": {
+    "sounds": [
+        {
+            "name": "records/bigbabytapehoodakmpthree",
+            "stream": true
+        }
+    ]
+},
+
+"music_disc.saythreeamjudas": {
+    "sounds": [
+        {
+            "name": "records/saythreeamjudas",
+            "stream": true
+        }
+    ]
+}
+}
