@@ -3,7 +3,7 @@
 
 
 ## Як змінювати:
-``git clone https://github.com/xxanqw/hudoliy-resourcepack.git``
+```git clone https://github.com/xxanqw/hudoliy-resourcepack.git```
 
 Внесення змін, далі запуск файлу **pack.bat** або (на лінуксі) **pack.sh**  
 На виході отримуємо **pack.zip**  
