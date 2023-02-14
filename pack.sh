@@ -1,4 +1,4 @@
-#!/bin/sh bash
+#!/bin/sh
 
 echo "Packing files..."
 
