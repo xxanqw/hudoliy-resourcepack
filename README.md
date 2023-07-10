@@ -1,4 +1,4 @@
-![alt text](https://github.com/xxanqw/hudoliy-resourcepack/tree/main/src/logo.png)
+![Лого]([https://github.com/xxanqw/hudoliy-resourcepack/tree/main/src/logo.png](https://github.com/xxanqw/hudoliy-resourcepack/blob/3e22022f440fbe8a61ce429501d7602c1b17a333/src/logo.png))
 # ХУДОЛІЙ-Пак
 Ресурс-пак для серверу "ХУДОЛІЙ"
 
