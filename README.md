@@ -4,7 +4,7 @@
 
 
 ## Як змінювати:
-```git clone https://github.com/xxanqw/hudoliy-resourcepack.git```
+```git clone --recurse-submodules https://github.com/xxanqw/hudoliy-resourcepack.git```
 
 Внесення змін, далі запуск файлу `pack.exe`.  
 На виході отримуємо **pack.zip** та SHA1 в консолі, його треба скопіювати і записати в файл SHA1.txt
