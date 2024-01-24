@@ -1,1 +1,6 @@
-{"pack":{"pack_format":16,"description":"худолій"}}
+{
+  "pack": {
+    "pack_format": 18,
+    "description": "худолій"
+  }
+}
