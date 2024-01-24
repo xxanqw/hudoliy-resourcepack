@@ -7,7 +7,7 @@ from PIL import Image, ImageTk
 
 def zipping():
     try:
-        cmd("7zip\\7za.exe a pack.zip pack\\*")
+        cmd("7zip\\7za.exe a pack.zip .\pack\*")
         messagebox.showinfo("Успіх", "Архів zip створено успішно.")
         calculate_sha1()
     except Exception as e:
@@ -30,7 +30,10 @@ def calculate_sha1():
         sha1_label.config(text=f"SHA1: {sha1}")
         root.clipboard_clear()
         root.clipboard_append(sha1)
-        messagebox.showinfo("Успіх", f"SHA1 скопійовано до буфера обміну.")
+        with open("sha1.txt", "w") as f:
+            f.write(sha1)
+            f.close
+        messagebox.showinfo("Успіх", f"SHA1 скопійовано до буфера обміну. Та записано до файлу sha1.txt.")
 
 def handle_button_click():
     threading.Thread(target=zipping).start()
