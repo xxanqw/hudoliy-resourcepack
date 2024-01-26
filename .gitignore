@@ -1,9 +1,6 @@
 pack.zip
 sha1.txt
 .DS_Store
-pack.build
-pack.dist
-pack.onefile-build
 pack-qt6.build
 pack-qt6.dist
 pack-qt6.onefile-build
