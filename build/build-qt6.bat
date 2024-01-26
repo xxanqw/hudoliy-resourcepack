@@ -1,0 +1,1 @@
+python -m nuitka --onefile --follow-imports --enable-plugin=pyqt6 --output-dir=../ --windows-icon-from-ico=../src/pack.ico --disable-console --deployment --company-name=xxanqw --product-name="Hudoliy ResourcePacker GUI for Windows (Qt6)" --file-version=0.0.2.0 --product-version=0.1.20.4 ../src/pack-qt6.py
