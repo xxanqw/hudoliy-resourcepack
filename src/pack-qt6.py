@@ -1,11 +1,11 @@
 import hashlib
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QMessageBox
+from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QMessageBox, QMenuBar, QMenu
 from PyQt6.QtCore import QThread, pyqtSignal
 from os import system as cmd
-from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtGui import QIcon, QPixmap, QAction
 from PyQt6.QtCore import QMimeData
-from PyQt6.QtGui import QClipboard
+import webbrowser
 
 class Worker(QThread):
     finished = pyqtSignal(str, str)
@@ -15,9 +15,9 @@ class Worker(QThread):
             if sys.platform == "win32":
                 cmd("7zip\\7za.exe a pack.zip .\pack\*")
             elif sys.platform == "linux" or sys.platform == "linux2":
-                cmd("7z a pack.zip .\pack\*")
+                cmd("7zip/7zz-linux a pack.zip ./pack/*")
             elif sys.platform == "darwin":
-                cmd("7z a pack.zip .\pack\*")
+                cmd("7zip/7zz-macos a pack.zip ./pack/*")
             self.finished.emit("Успіх", "Архів zip створено успішно.")
         except Exception as e:
             self.finished.emit("Помилка", f"Не вдалося створити архів zip: {e}")
@@ -45,7 +45,12 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Hudoliy ResourcePacker GUI for Windows (Qt6)")
+        if sys.platform == "win32":
+            self.setWindowTitle("Hudoliy ResourcePacker GUI for Windows (Qt6)")
+        elif sys.platform == "linux" or sys.platform == "linux2":
+            self.setWindowTitle("Hudoliy ResourcePacker GUI for Linux (Qt6)")
+        elif sys.platform == "darwin":
+            self.setWindowTitle("Hudoliy ResourcePacker GUI for macOS (Qt6)")    
         self.setFixedSize(517, 250)
         self.setWindowIcon(QIcon("./src/pack.ico"))
 
@@ -71,6 +76,17 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
 
+        menu_bar = QMenuBar(self)
+        help_menu = QMenu("Допомога", self)
+        github_action = QAction("GitHub", self)
+        github_action.triggered.connect(lambda: webbrowser.open('https://github.com/xxanqw/hudoliy-resourcepack'))
+        about_action = QAction("Про програму", self)
+        about_action.triggered.connect(self.show_about_dialog)
+        help_menu.addAction(github_action)
+        help_menu.addAction(about_action)
+        menu_bar.addMenu(help_menu)
+        self.setMenuBar(menu_bar)
+
     def handle_button_click(self):
         self.worker.start()
 
@@ -85,6 +101,9 @@ class MainWindow(QMainWindow):
                 mimeData.setText(sha1)
                 clipboard.setMimeData(mimeData)
                 self.show_message("Успіх", f"SHA1 скопійовано до буфера обміну. Та записано до файлу sha1.txt.")
+    
+    def show_about_dialog(self):
+        QMessageBox.about(self, "Про програму", "Hudoliy ResourcePacker GUI (Qt6)\n\nАвтор: xxanqw\n\nGitHub: https://github.com/xxanqw")
 
 app = QApplication(sys.argv)
 window = MainWindow()
