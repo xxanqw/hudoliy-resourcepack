@@ -1,1 +1,0 @@
-python -m nuitka --onefile --follow-imports --enable-plugin=tk-inter  --output-dir=../ --windows-icon-from-ico=../src/pack.ico --disable-console --deployment --company-name=xxanqw --product-name="Hudoliy ResourcePacker GUI for Windows" --file-version=0.0.1.3 --product-version=0.1.20.4 ../src/pack.py

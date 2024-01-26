@@ -1,12 +1,14 @@
-## Windows
- - Мати встановлений Python 3.11.x
- - Встановити залежності `pip install nuitka pyqt6` або для звичайної версії `pip install nuitka pillow`
- - Запустити `build-qt6.bat` або `build.bat`
+## Windows/Linux/MacOS
+ - Мати встановлений Python [3.12.x](https://www.python.org/downloads/release/python-3121/#:~:text=Python%20community.-,Files,-Version)
+ - Встановити залежності `pip` або `pip3 install -r requirements.pip`
+ - Для лінукса встановити `patchelf` та `ccache`
+```
+   Arch
+   sudo pacman -S patchelf ccache
+   yay -S patchelf ccache
 
-## Linux/MacOS
- - Мати встановлений Python 3.11.x
- - Встановити залежності `pip3 install nuitka pyqt6` звичайна версія не працює на цих ОС
- - Запустити `build-qt6.sh` (chmod +x вже має бути за замовчуванням)
-
-### Додаток
-Скоро звичайна версія буде видалена
+   Debian/Ubuntu
+   sudo apt install patchelf ccache
+```
+ - Запустити скріпт `python` або `python3 build.py`  
+ (ВАЖЛИВО запускати скріпт саме з цієї папки)
