@@ -1,11 +1,15 @@
 import hashlib
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QMessageBox, QMenuBar, QMenu
+from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QMessageBox, QMenuBar, QMenu, QDialog
 from PyQt6.QtCore import QThread, pyqtSignal
 from os import system as cmd
 from PyQt6.QtGui import QIcon, QPixmap, QAction
 from PyQt6.QtCore import QMimeData
 import webbrowser
+import requests
+import subprocess
+
+current_version = '2.2'
 
 class Worker(QThread):
     finished = pyqtSignal(str, str)
@@ -85,6 +89,11 @@ class MainWindow(QMainWindow):
         help_menu.addAction(github_action)
         help_menu.addAction(about_action)
         menu_bar.addMenu(help_menu)
+        update_menu = QMenu("Оновлення", self)
+        check_update_action = QAction("Перевірити оновлення", self)
+        check_update_action.triggered.connect(self.open_update_dialog)
+        update_menu.addAction(check_update_action)
+        menu_bar.addMenu(update_menu)
         self.setMenuBar(menu_bar)
 
     def handle_button_click(self):
@@ -104,6 +113,54 @@ class MainWindow(QMainWindow):
     
     def show_about_dialog(self):
         QMessageBox.about(self, "Про програму", "Hudoliy ResourcePacker GUI (Qt6)\n\nАвтор: xxanqw\n\nGitHub: https://github.com/xxanqw")
+        
+    def open_update_dialog(self):
+        self.update_dialog = UpdateDialog(self)
+        self.update_dialog.check_updates()
+        self.update_dialog.exec()
+
+class UpdateDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.layout = QVBoxLayout()
+        self.label = QLabel("Перевірка оновлень...")
+        self.version = QLabel(f"Ваша версія: {current_version}")
+        self.update_button = QPushButton("Оновити")
+        self.update_button.clicked.connect(self.on_update)
+        self.update_button.setEnabled(False)
+        self.layout.addWidget(self.label)
+        self.layout.addWidget(self.version)
+        self.layout.addWidget(self.update_button)
+        self.setLayout(self.layout)
+        self.setFixedSize(200,100)
+        self.setWindowTitle("Перевірка на оновлення")
+
+    def check_updates(self):
+        latest_version = self.get_version()
+        if latest_version and latest_version != current_version:
+            self.label.setText(f"Доступне оновлення: {latest_version}")
+            self.update_button.setEnabled(True)
+        else:
+            self.label.setText("Оновлень немає.")
+
+    def on_update(self):
+        self.run_update_script()
+
+    def run_update_script(self):
+        try:
+            subprocess.Popen(['python', './src/update.py'])
+            sys.exit()
+        except Exception as e:
+            print(f"Error running update script: {e}")
+    
+    def get_version(self):
+        try:
+            response = requests.get('https://versionmanager.xserv.pp.ua/hpgui.ver')
+            response.raise_for_status()
+            return response.text.strip()
+        except Exception as e:
+            print(f"Error getting version: {e}")
+            return None
 
 app = QApplication(sys.argv)
 window = MainWindow()

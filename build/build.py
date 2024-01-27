@@ -8,7 +8,7 @@ def build():
 
     print(f"\nЗбірка для {osname()}...\n")
     if sys.platform == "win32":
-        cmd('python -m nuitka --onefile --follow-imports --enable-plugin=pyqt6 -o pack-qt6-win --output-dir=../ --windows-icon-from-ico=../src/pack.ico --disable-console --deployment --company-name=xxanqw --product-name="Hudoliy ResourcePacker GUI for Windows (Qt6)" --file-version=0.0.2.0 --product-version=0.1.20.4 ../src/pack-qt6.py')
+        cmd('python -m nuitka --onefile --follow-imports --enable-plugin=pyqt6 -o pack-qt6-win --output-dir=../ --windows-icon-from-ico=../src/pack.ico --disable-console --deployment --company-name=xxanqw --product-name="Hudoliy ResourcePacker GUI for Windows (Qt6)" --file-version=0.0.2.2 --product-version=0.1.20.4 ../src/pack-qt6.py')
     elif sys.platform == "linux" or sys.platform == "linux2":
         cmd('python -m nuitka --onefile --follow-imports --enable-plugin=pyqt6 -o pack-qt6-linux --output-dir=../ --disable-console --deployment ../src/pack-qt6.py')
     elif sys.platform == "darwin":
