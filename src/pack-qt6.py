@@ -1,15 +1,14 @@
 import hashlib
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QMessageBox, QMenuBar, QMenu, QDialog
+from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QMessageBox, QMenuBar, QMenu, QDialog, QHBoxLayout
 from PyQt6.QtCore import QThread, pyqtSignal
 from os import system as cmd
+from os import path as p
 from PyQt6.QtGui import QIcon, QPixmap, QAction
 from PyQt6.QtCore import QMimeData
 import webbrowser
 import requests
 import subprocess
-
-current_version = '2.2'
 
 class Worker(QThread):
     finished = pyqtSignal(str, str)
@@ -81,6 +80,11 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(container)
 
         menu_bar = QMenuBar(self)
+        file_menu = QMenu("Файл", self)
+        exit_action = QAction("Вихід", self)
+        exit_action.setShortcut("Ctrl+Q")
+        exit_action.triggered.connect(self.close)
+        menu_bar.addMenu(file_menu)
         help_menu = QMenu("Допомога", self)
         github_action = QAction("GitHub", self)
         github_action.triggered.connect(lambda: webbrowser.open('https://github.com/xxanqw/hudoliy-resourcepack'))
@@ -89,6 +93,7 @@ class MainWindow(QMainWindow):
         help_menu.addAction(github_action)
         help_menu.addAction(about_action)
         menu_bar.addMenu(help_menu)
+        file_menu.addAction(exit_action)
         update_menu = QMenu("Оновлення", self)
         check_update_action = QAction("Перевірити оновлення", self)
         check_update_action.triggered.connect(self.open_update_dialog)
@@ -112,39 +117,93 @@ class MainWindow(QMainWindow):
                 self.show_message("Успіх", f"SHA1 скопійовано до буфера обміну. Та записано до файлу sha1.txt.")
     
     def show_about_dialog(self):
-        QMessageBox.about(self, "Про програму", "Hudoliy ResourcePacker GUI (Qt6)\n\nАвтор: xxanqw\n\nGitHub: https://github.com/xxanqw")
+        QMessageBox.about(self, "Про програму", "Hudoliy ResourcePacker GUI (Qt6)\n\nАвтор: xxanqw\n\nGitHub: https://github.com/xxanqw/hudoliy-resourcepack")
         
     def open_update_dialog(self):
         self.update_dialog = UpdateDialog(self)
         self.update_dialog.check_updates()
         self.update_dialog.exec()
 
+class UpdateThread(QThread):
+    update_available = pyqtSignal(str)
+
+    def __init__(self, dialog):
+        super().__init__()
+        self.dialog = dialog
+
+    def run(self):
+        latest_commit = self.dialog.get_commit()
+        self.dialog.get_commit_file()
+        if p.exists('commit'):
+            with open('commit', 'r') as f:
+                current_commit = f.read().strip()
+        else:
+            current_commit = None
+
+        if latest_commit and latest_commit != current_commit:
+            self.update_available.emit(latest_commit)
+
 class UpdateDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.layout = QVBoxLayout()
         self.label = QLabel("Перевірка оновлень...")
-        self.version = QLabel(f"Ваша версія: {current_version}")
+        self.current_commit_label = QLabel()
+        self.layout.addWidget(self.current_commit_label)
+        self.button_layout = QHBoxLayout()
         self.update_button = QPushButton("Оновити")
         self.update_button.clicked.connect(self.on_update)
         self.update_button.setEnabled(False)
+        self.exit_button = QPushButton("Вихід")
+        self.exit_button.clicked.connect(self.close)
         self.layout.addWidget(self.label)
-        self.layout.addWidget(self.version)
-        self.layout.addWidget(self.update_button)
+        self.button_layout.addWidget(self.update_button)
+        self.button_layout.addWidget(self.exit_button)
+        self.layout.addLayout(self.button_layout)
         self.setLayout(self.layout)
-        self.setFixedSize(200,100)
+        self.setFixedSize(500,100)
         self.setWindowTitle("Перевірка на оновлення")
 
-    def check_updates(self):
-        latest_version = self.get_version()
-        if latest_version and latest_version != current_version:
-            self.label.setText(f"Доступне оновлення: {latest_version}")
-            self.update_button.setEnabled(True)
-        else:
-            self.label.setText("Оновлень немає.")
+    def get_commit(self):
+        try:
+            commit = subprocess.check_output(["git", "rev-parse", "HEAD"]).strip().decode()
+            return commit
+        except subprocess.CalledProcessError as e:
+            QMessageBox.critical(self, "Помилка отримання коміту", f"Помилка при виконанні git rev-parse HEAD: {e}")
+            return None
 
+    def get_commit_file(self):
+        try:
+            response = requests.get("https://versionmanager.xserv.pp.ua/commit")
+            if response.status_code == 200:
+                with open('commit', 'w') as f:
+                    f.write(response.text)
+            else:
+                QMessageBox.critical(self, "Помилка оновлення", f"Не вдалося отримати файл коміту: {response.status_code}")
+        except Exception as e:
+            QMessageBox.critical(self, "Помилка оновлення", f"Помилка при отриманні файлу коміту: {e}")
+
+    def check_updates(self):
+        self.update_thread = UpdateThread(self)
+        self.update_thread.update_available.connect(self.on_update_available)
+        self.update_thread.start()
+
+    def on_update_available(self, latest_commit):
+        self.label.setText(f"Доступне оновлення: {latest_commit}")
+        self.update_button.setEnabled(True)
+    
     def on_update(self):
-        self.run_update_script()
+        self.git_pull()
+        if p.exists('commit'):
+            with open('commit', 'w') as f:
+                f.write(self.get_commit())
+
+    def git_pull(self):
+        try:
+            subprocess.check_call(["git", "pull"])
+            QMessageBox.information(self, "Оновлення", "Оновлення успішно завантажено. Перезапустіть програму.")
+        except subprocess.CalledProcessError as e:
+            QMessageBox.critical(self, "Помилка оновлення", f"Помилка при виконанні git pull: {e}")
 
     def run_update_script(self):
         try:
