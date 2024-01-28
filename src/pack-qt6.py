@@ -148,7 +148,7 @@ class UpdateDialog(QDialog):
         super().__init__(parent)
         self.layout = QVBoxLayout()
         self.label = QLabel("Перевірка оновлень...")
-        self.current_commit_label = QLabel()
+        self.current_commit_label = QLabel("Перевірка оновлення йде по коміту.")
         self.layout.addWidget(self.current_commit_label)
         self.button_layout = QHBoxLayout()
         self.update_button = QPushButton("Оновити")
@@ -204,22 +204,6 @@ class UpdateDialog(QDialog):
             QMessageBox.information(self, "Оновлення", "Оновлення успішно завантажено. Перезапустіть програму.")
         except subprocess.CalledProcessError as e:
             QMessageBox.critical(self, "Помилка оновлення", f"Помилка при виконанні git pull: {e}")
-
-    def run_update_script(self):
-        try:
-            subprocess.Popen(['python', './src/update.py'])
-            sys.exit()
-        except Exception as e:
-            print(f"Error running update script: {e}")
-    
-    def get_version(self):
-        try:
-            response = requests.get('https://versionmanager.xserv.pp.ua/hpgui.ver')
-            response.raise_for_status()
-            return response.text.strip()
-        except Exception as e:
-            print(f"Error getting version: {e}")
-            return None
 
 app = QApplication(sys.argv)
 window = MainWindow()
