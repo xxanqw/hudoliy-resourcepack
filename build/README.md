@@ -1,5 +1,5 @@
 ## Windows/Linux/MacOS
- - Мати встановлений Python [3.12.x](https://www.python.org/downloads/release/python-3121/#:~:text=Python%20community.-,Files,-Version)
+ - Мати встановлений Python [3.11.6](https://www.python.org/downloads/release/python-3116/#:~:text=Python%20community.-,Files,-Version)
  - Встановити залежності `pip` або `pip3 install -r requirements.pip`
  - Для лінукса встановити `patchelf` та `ccache`
 ```
