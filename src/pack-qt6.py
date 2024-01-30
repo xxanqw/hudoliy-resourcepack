@@ -60,8 +60,13 @@ class MainWindow(QMainWindow):
         self.worker = Worker()
         self.worker.finished.connect(self.show_message)
 
+        self.button_layout = QHBoxLayout()
         self.button = QPushButton("Запакувати та обчислити SHA1")
         self.button.clicked.connect(self.handle_button_click)
+        self.button_layout.addWidget(self.button)
+        self.settings_button = QPushButton("Налаштування")
+        self.settings_button.clicked.connect(self.settings)
+        self.button_layout.addWidget(self.settings_button)
 
         self.sha1_label = QLabel("SHA1 буде відображено тут")
 
@@ -72,7 +77,7 @@ class MainWindow(QMainWindow):
 
         layout = QVBoxLayout()
         layout.addWidget(self.logo_label)
-        layout.addWidget(self.button)
+        layout.addLayout(self.button_layout)
         layout.addWidget(self.sha1_label)
 
         container = QWidget()
@@ -100,6 +105,9 @@ class MainWindow(QMainWindow):
         update_menu.addAction(check_update_action)
         menu_bar.addMenu(update_menu)
         self.setMenuBar(menu_bar)
+        
+    def settings(self):
+        QMessageBox.information(self, "Налаштування", "Налаштування будуть доступні в наступних версіях.")
 
     def handle_button_click(self):
         self.worker.start()
@@ -126,6 +134,7 @@ class MainWindow(QMainWindow):
 
 class UpdateThread(QThread):
     update_available = pyqtSignal(str)
+    no_update_available = pyqtSignal()
 
     def __init__(self, dialog):
         super().__init__()
@@ -134,14 +143,16 @@ class UpdateThread(QThread):
     def run(self):
         latest_commit = self.dialog.get_commit()
         self.dialog.get_commit_file()
-        if p.exists('commit'):
-            with open('commit', 'r') as f:
+        if p.exists('./src/commit'):
+            with open('./src/commit', 'r') as f:
                 current_commit = f.read().strip()
         else:
             current_commit = None
 
         if latest_commit and latest_commit != current_commit:
             self.update_available.emit(latest_commit)
+        elif latest_commit == current_commit:
+            self.no_update_available.emit()
 
 class UpdateDialog(QDialog):
     def __init__(self, parent=None):
@@ -176,7 +187,7 @@ class UpdateDialog(QDialog):
         try:
             response = requests.get("https://versionmanager.xserv.pp.ua/commit")
             if response.status_code == 200:
-                with open('commit', 'w') as f:
+                with open('./src/commit', 'w') as f:
                     f.write(response.text)
             else:
                 QMessageBox.critical(self, "Помилка оновлення", f"Не вдалося отримати файл коміту: {response.status_code}")
@@ -186,7 +197,11 @@ class UpdateDialog(QDialog):
     def check_updates(self):
         self.update_thread = UpdateThread(self)
         self.update_thread.update_available.connect(self.on_update_available)
+        self.update_thread.no_update_available.connect(self.on_no_update_available)
         self.update_thread.start()
+
+    def on_no_update_available(self):
+        self.label.setText("Оновлень немає.")
 
     def on_update_available(self, latest_commit):
         self.label.setText(f"Доступне оновлення: {latest_commit}")
